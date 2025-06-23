@@ -24,12 +24,12 @@ app.get('/api/convert', async (req, res) => {
       .audioBitrate(128)
       .format('mp3')
       .on('error', (err) => {
-        console.error(err);
+        console.error('ffmpeg error:', err.stack || err);
         res.status(500).end();
       })
       .pipe(res, { end: true });
   } catch (err) {
-    console.error(err);
+    console.error('conversion error:', err.stack || err);
     const message = err && err.message ? err.message : '';
     if (message.includes('Could not extract functions')) {
       return res.status(502).json({
