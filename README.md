@@ -76,3 +76,14 @@ npm test
 ```
 
 This runs the Jest test suite which exercises the Express backend.
+
+## Troubleshooting
+
+If the backend responds with an error mentioning `Could not extract functions`,
+update the `ytdl-core` dependency to a newer version:
+
+```bash
+npm install ytdl-core@latest
+```
+
+You may need to rebuild the Docker image if you're running inside a container.
