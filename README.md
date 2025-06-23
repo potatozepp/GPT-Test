@@ -26,6 +26,24 @@ where you can submit a video URL and download the audio.
 The backend uses `ffmpeg` for audio conversion. Ensure `ffmpeg` is installed
 and available in your `PATH` before running the server.
 
+## Running in Docker
+
+You can also use Docker to run the application with all dependencies preinstalled.
+
+1. Build the image (requires internet access to download npm packages and ffmpeg):
+   ```bash
+   docker build -t daily-toolkit .
+   ```
+2. Start the container:
+   ```bash
+   docker run --rm -p 5173:5173 -p 3001:3001 daily-toolkit
+   ```
+3. Open `http://localhost:5173` in your browser.
+
+The container installs `ffmpeg` and runs both the Express backend and Vite dev
+server. Your environment still needs outbound network access for the backend to
+fetch YouTube videos.
+
 ## Building for Production
 
 To create a production build:
