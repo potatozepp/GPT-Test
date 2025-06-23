@@ -9,8 +9,18 @@ export default function Converter() {
     if (!url) return;
     setStatus('Converting...');
     try {
-      // This would normally call a backend service to perform the conversion.
-      await new Promise((r) => setTimeout(r, 1000));
+      const response = await fetch(`/api/convert?url=${encodeURIComponent(url)}`);
+      if (!response.ok) throw new Error('Failed');
+      const blob = await response.blob();
+      const href = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = href;
+      a.download = 'audio.mp3';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(href);
       setStatus('Conversion complete!');
     } catch (err) {
       setStatus('Conversion failed');
