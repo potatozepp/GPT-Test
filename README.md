@@ -62,3 +62,17 @@ The build output will be in the `dist` directory.
 - `server/index.js` – Express backend providing the `/api/convert` endpoint
 
 Replace the placeholder images in `App.jsx` with your own content to personalize the page.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+## Running Tests
+
+After installing dependencies with `npm install`, run:
+
+```bash
+npm test
+```
+
+This runs the Jest test suite which exercises the Express backend.

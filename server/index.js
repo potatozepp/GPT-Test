@@ -1,7 +1,6 @@
 const express = require('express');
 const ytdl = require('ytdl-core');
 const ffmpeg = require('fluent-ffmpeg');
-const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -41,6 +40,10 @@ app.get('/api/convert', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+}
+
+module.exports = app;
