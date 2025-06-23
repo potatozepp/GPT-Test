@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function Footer() {
   return (
-    <footer className="page-footer blue darken-2">
+    <footer className="page-footer purple darken-2">
       <div className="container">
         <div className="row">
           <div className="col s12 center-align">

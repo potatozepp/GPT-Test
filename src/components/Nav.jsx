@@ -3,7 +3,7 @@ import React from 'react';
 export default function Nav({ currentPage, onNavigate }) {
   return (
     <nav>
-      <div className="nav-wrapper blue">
+      <div className="nav-wrapper purple">
         <a href="#" className="brand-logo" onClick={() => onNavigate('home')}>Demo</a>
         <ul id="nav-mobile" className="right hide-on-med-and-down">
           <li className={currentPage === 'home' ? 'active' : ''}>

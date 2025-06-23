@@ -27,7 +27,7 @@ export default function Contact() {
             <textarea id="message" className="materialize-textarea" required></textarea>
             <label htmlFor="message">Message</label>
           </div>
-          <button className="btn waves-effect waves-light" type="submit">Send</button>
+          <button className="btn waves-effect waves-light purple" type="submit">Send</button>
         </form>
       )}
     </div>
