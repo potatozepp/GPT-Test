@@ -6,16 +6,16 @@ export default function Footer() {
       <div className="container">
         <div className="row">
           <div className="col s12 center-align">
-            <h5 className="white-text">Demo App</h5>
+            <h5 className="white-text">Daily Toolkit</h5>
             <p className="grey-text text-lighten-4">
-              Making cool pages with React and Materialize.
+              A collection of small utilities for everyday use.
             </p>
           </div>
         </div>
       </div>
       <div className="footer-copyright">
         <div className="container center-align">
-          © 2024 Demo Inc.
+          © 2024 Daily Toolkit
         </div>
       </div>
     </footer>

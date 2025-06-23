@@ -10,8 +10,12 @@ export default function Home() {
             <img src="https://picsum.photos/500/300" alt="Example" />
           </div>
           <div className="col s12 m6">
-            <h5>Example Section</h5>
-            <p>This is an example image with accompanying text. Replace the image and text with your own content.</p>
+            <h5>Welcome to the Daily Toolkit</h5>
+            <p>
+              This project collects small utilities you'll find handy every day.
+              Use the navigation above to explore tools like the YouTube to MP3
+              converter.
+            </p>
           </div>
         </div>
         <div className="row">
