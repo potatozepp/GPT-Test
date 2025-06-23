@@ -10,7 +10,10 @@ export default function Converter() {
     setStatus('Converting...');
     try {
       const response = await fetch(`/api/convert?url=${encodeURIComponent(url)}`);
-      if (!response.ok) throw new Error('Failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Conversion failed');
+      }
       const blob = await response.blob();
       const href = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -22,7 +25,7 @@ export default function Converter() {
       window.URL.revokeObjectURL(href);
       setStatus('Conversion complete!');
     } catch (err) {
-      setStatus('Conversion failed');
+      setStatus(err.message || 'Conversion failed');
     }
   };
 
