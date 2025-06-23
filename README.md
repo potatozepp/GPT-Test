@@ -1,6 +1,9 @@
-# GPT-Test React
+# Daily Toolkit
 
-This project is now a small React application built with [Vite](https://vitejs.dev/). Styles are written using SCSS.
+This project has evolved into a small React application that provides a collection
+of everyday utilities. It is built with [Vite](https://vitejs.dev/) and styled
+using SCSS. One of the included tools is a simple YouTube to MP3 converter page
+where you can submit a video URL and download the audio.
 
 ## Getting Started
 
