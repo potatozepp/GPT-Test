@@ -30,6 +30,13 @@ app.get('/api/convert', async (req, res) => {
       .pipe(res, { end: true });
   } catch (err) {
     console.error(err);
+    const message = err && err.message ? err.message : '';
+    if (message.includes('Could not extract functions')) {
+      return res.status(502).json({
+        error:
+          'Failed to retrieve video details. The YouTube page layout may have changed or ytdl-core is outdated.'
+      });
+    }
     res.status(500).json({ error: 'Conversion failed' });
   }
 });
