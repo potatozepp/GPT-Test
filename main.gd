@@ -20,7 +20,7 @@ var spawn_interval := 2.0
 var game_loaded := false
 var waves_running := false
 var editing_mode := false
-var placement_mode := "path"
+var placement_mode := ""
 
 @onready var start_menu = $CanvasLayer/StartMenu
 @onready var new_game_button = $CanvasLayer/StartMenu/VBoxContainer/NewGameButton
@@ -34,6 +34,7 @@ var placement_mode := "path"
 @onready var stop_button = $CanvasLayer/StopButton
 @onready var path_button = $CanvasLayer/PathButton
 @onready var turret_button = $CanvasLayer/TurretButton
+@onready var menu_button = $CanvasLayer/MenuButton
 @onready var selection_panel = $CanvasLayer/SelectionPanel
 @onready var sell_button = $CanvasLayer/SelectionPanel/VBoxContainer/SellButton
 @onready var upgrade_button = $CanvasLayer/SelectionPanel/VBoxContainer/UpgradeButton
@@ -64,15 +65,17 @@ func _ready() -> void:
 		turret_button.pressed.connect(set_mode_turret)
 		sell_button.pressed.connect(_on_sell_pressed)
 		upgrade_button.pressed.connect(_on_upgrade_pressed)
-		move_button.pressed.connect(_on_move_pressed)
-		delete_button.pressed.connect(_on_delete_pressed)
-		edit_button.visible = false
-		run_button.visible = false
-		stop_button.visible = false
-		path_button.visible = false
-		turret_button.visible = false
-		selection_panel.visible = false
-		settings_menu.hide()
+                move_button.pressed.connect(_on_move_pressed)
+                delete_button.pressed.connect(_on_delete_pressed)
+                menu_button.pressed.connect(_on_menu_pressed)
+                edit_button.visible = false
+                run_button.visible = false
+                stop_button.visible = false
+                path_button.visible = false
+                turret_button.visible = false
+                menu_button.visible = false
+                selection_panel.visible = false
+                settings_menu.hide()
 		set_process(true)
 		set_process_unhandled_input(true)
 
@@ -120,17 +123,21 @@ func start_game() -> void:
 		game_loaded = true
 		start_menu.hide()
 		settings_menu.hide()
-		edit_button.show()
-		run_button.show()
-		stop_button.hide()
-		path_button.show()
-		turret_button.show()
-		editing_mode = false
-		edit_button.text = "Edit"
-		path_button.disabled = true
-		turret_button.disabled = true
-		preview_path.hide()
-		preview_tower.hide()
+                edit_button.show()
+                run_button.show()
+                stop_button.hide()
+                path_button.show()
+                turret_button.show()
+                menu_button.show()
+                editing_mode = false
+                edit_button.text = "Edit"
+                path_button.disabled = true
+                turret_button.disabled = true
+                menu_button.disabled = false
+                path_button.text = "Place Path"
+                turret_button.text = "Place Turret"
+                preview_path.hide()
+                preview_tower.hide()
 
 func show_settings() -> void:
 		start_menu.hide()
@@ -144,56 +151,66 @@ func exit_game() -> void:
 		get_tree().quit()
 
 func toggle_edit() -> void:
-		if waves_running:
-				return
-		editing_mode = not editing_mode
-		edit_button.text = "Resume" if editing_mode else "Edit"
-		if editing_mode:
-				if placement_mode == "path":
-						preview_path.show()
-				else:
-						preview_tower.show()
-		else:
-				preview_path.hide()
-				preview_tower.hide()
-		path_button.disabled = not editing_mode
-		turret_button.disabled = not editing_mode
-		var enemies = get_tree().get_nodes_in_group("enemies")
-		for e in enemies:
-				e.set_physics_process(not editing_mode)
+                if waves_running:
+                                return
+                editing_mode = not editing_mode
+                edit_button.text = "Resume" if editing_mode else "Edit"
+                if not editing_mode:
+                                placement_mode = ""
+                                preview_path.hide()
+                                preview_tower.hide()
+                                path_button.text = "Place Path"
+                                turret_button.text = "Place Turret"
+                path_button.disabled = not editing_mode
+                turret_button.disabled = not editing_mode
+                var enemies = get_tree().get_nodes_in_group("enemies")
+                for e in enemies:
+                                e.set_physics_process(not editing_mode)
 
 func start_waves() -> void:
 		if not game_loaded:
 				return
-		waves_running = true
-		editing_mode = false
-		edit_button.disabled = true
-		edit_button.text = "Edit"
-		run_button.hide()
-		stop_button.show()
-		preview_path.hide()
-		preview_tower.hide()
-		spawn_time = spawn_interval
+                waves_running = true
+                editing_mode = false
+                edit_button.disabled = true
+                edit_button.text = "Edit"
+                run_button.hide()
+                stop_button.show()
+                placement_mode = ""
+                preview_path.hide()
+                preview_tower.hide()
+                path_button.text = "Place Path"
+                turret_button.text = "Place Turret"
+                spawn_time = spawn_interval
 
 func stop_waves() -> void:
-		if not waves_running:
-				return
-		waves_running = false
-		editing_mode = true
-		edit_button.disabled = false
-		edit_button.text = "Resume"
-		run_button.show()
-		stop_button.hide()
-		if placement_mode == "path":
-				preview_path.show()
-				preview_tower.hide()
-		else:
-				preview_tower.show()
-				preview_path.hide()
-		spawn_time = spawn_interval
-		var enemies = get_tree().get_nodes_in_group("enemies")
-		for e in enemies:
-				e.queue_free()
+                if not waves_running:
+                                return
+                waves_running = false
+                editing_mode = true
+                edit_button.disabled = false
+                edit_button.text = "Resume"
+                run_button.show()
+                stop_button.hide()
+                if placement_mode == "path":
+                                preview_path.show()
+                                preview_tower.hide()
+                                path_button.text = "Cancel"
+                                turret_button.text = "Place Turret"
+                elif placement_mode == "turret":
+                                preview_tower.show()
+                                preview_path.hide()
+                                turret_button.text = "Cancel"
+                                path_button.text = "Place Path"
+                else:
+                                preview_path.hide()
+                                preview_tower.hide()
+                                path_button.text = "Place Path"
+                                turret_button.text = "Place Turret"
+                spawn_time = spawn_interval
+                var enemies = get_tree().get_nodes_in_group("enemies")
+                for e in enemies:
+                                e.queue_free()
 
 func _unhandled_input(event: InputEvent) -> void:
 		if not game_loaded:
@@ -206,27 +223,27 @@ func _unhandled_input(event: InputEvent) -> void:
 				clear_selection()
 				return
 
-		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-				var mouse_pos = event.position
-				var origin = camera.project_ray_origin(mouse_pos)
-				var dir = camera.project_ray_normal(mouse_pos)
-				var space = get_world_3d().direct_space_state
-				var query = PhysicsRayQueryParameters3D.create(origin, origin + dir * 1000)
-				var result = space.intersect_ray(query)
-				if result:
-						var node = result.collider
-						if node.is_in_group("paths") or node.is_in_group("towers"):
-								select_node(node)
-								return
-						elif node.get_parent() and (node.get_parent().is_in_group("paths") or node.get_parent().is_in_group("towers")):
-								select_node(node.get_parent())
-								return
-				clear_selection()
-				if editing_mode:
-						if placement_mode == "path":
-								add_path_segment(preview_path.position)
-						else:
-								place_turret(preview_tower.position)
+                if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+                                var mouse_pos = event.position
+                                var origin = camera.project_ray_origin(mouse_pos)
+                                var dir = camera.project_ray_normal(mouse_pos)
+                                var space = get_world_3d().direct_space_state
+                                var query = PhysicsRayQueryParameters3D.create(origin, origin + dir * 1000)
+                                var result = space.intersect_ray(query)
+                                if result:
+                                                var node = result.collider
+                                                if node.is_in_group("paths") or node.is_in_group("towers"):
+                                                                select_node(node)
+                                                                return
+                                                elif node.get_parent() and (node.get_parent().is_in_group("paths") or node.get_parent().is_in_group("towers")):
+                                                                select_node(node.get_parent())
+                                                                return
+                                clear_selection()
+                                if editing_mode and placement_mode != "":
+                                                if placement_mode == "path":
+                                                                add_path_segment(preview_path.position)
+                                                elif placement_mode == "turret":
+                                                                place_turret(preview_tower.position)
 
 func add_path_segment(pos: Vector3) -> void:
 		pos.y = 0
@@ -339,26 +356,46 @@ func update_preview() -> void:
 		pos = pos.snapped(Vector3.ONE)
 		pos.x = clamp(pos.x, MIN_X, MAX_X)
 		pos.z = clamp(pos.z, MIN_Z, MAX_Z)
-		if placement_mode == "path":
-				preview_path.position = pos
-				preview_path.show()
-				preview_tower.hide()
-		else:
-				preview_tower.position = pos
-				preview_tower.show()
-				preview_path.hide()
+                if placement_mode == "path":
+                                preview_path.position = pos
+                                preview_path.show()
+                                preview_tower.hide()
+                elif placement_mode == "turret":
+                                preview_tower.position = pos
+                                preview_tower.show()
+                                preview_path.hide()
+                else:
+                                preview_path.hide()
+                                preview_tower.hide()
 
 func set_mode_path() -> void:
-		placement_mode = "path"
-		preview_tower.hide()
-		if editing_mode:
-				preview_path.show()
+                if placement_mode == "path":
+                                placement_mode = ""
+                                preview_path.hide()
+                                path_button.text = "Place Path"
+                else:
+                                placement_mode = "path"
+                                path_button.text = "Cancel"
+                                turret_button.text = "Place Turret"
+                                preview_tower.hide()
+                                if editing_mode:
+                                                preview_path.show()
 
 func set_mode_turret() -> void:
-		placement_mode = "turret"
-		preview_path.hide()
-		if editing_mode:
-				preview_tower.show()
+                if placement_mode == "turret":
+                                placement_mode = ""
+                                preview_tower.hide()
+                                turret_button.text = "Place Turret"
+                else:
+                                placement_mode = "turret"
+                                turret_button.text = "Cancel"
+                                path_button.text = "Place Path"
+                                preview_path.hide()
+                                if editing_mode:
+                                                preview_tower.show()
+
+func _on_menu_pressed() -> void:
+                get_tree().reload_current_scene()
 
 func spawn_enemy() -> void:
 		var enemy = EnemyScene.instantiate()
