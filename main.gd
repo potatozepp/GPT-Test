@@ -223,27 +223,27 @@ func _unhandled_input(event: InputEvent) -> void:
 		clear_selection()
 		return
 
-		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			var mouse_pos = event.position
-			var origin = camera.project_ray_origin(mouse_pos)
-			var dir = camera.project_ray_normal(mouse_pos)
-			var space = get_world_3d().direct_space_state
-			var query = PhysicsRayQueryParameters3D.create(origin, origin + dir * 1000)
-			var result = space.intersect_ray(query)
-			if result:
-				var node = result.collider
-				if node.is_in_group("paths") or node.is_in_group("towers"):
-					select_node(node)
-					return
-				elif node.get_parent() and (node.get_parent().is_in_group("paths") or node.get_parent().is_in_group("towers")):
-					select_node(node.get_parent())
-					return
-			clear_selection()
-			if editing_mode and placement_mode != "":
-				if placement_mode == "path":
-					add_path_segment(preview_path.position)
-				elif placement_mode == "turret":
-					place_turret(preview_tower.position)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		var mouse_pos = event.position
+		var origin = camera.project_ray_origin(mouse_pos)
+		var dir = camera.project_ray_normal(mouse_pos)
+		var space = get_world_3d().direct_space_state
+		var query = PhysicsRayQueryParameters3D.create(origin, origin + dir * 1000)
+		var result = space.intersect_ray(query)
+		if result:
+			var node = result.collider
+			if node.is_in_group("paths") or node.is_in_group("towers"):
+				select_node(node)
+				return
+			elif node.get_parent() and (node.get_parent().is_in_group("paths") or node.get_parent().is_in_group("towers")):
+				select_node(node.get_parent())
+				return
+		clear_selection()
+		if editing_mode and placement_mode != "":
+			if placement_mode == "path":
+				add_path_segment(preview_path.position)
+			elif placement_mode == "turret":
+				place_turret(preview_tower.position)
 
 func add_path_segment(pos: Vector3) -> void:
 	pos.y = 0
