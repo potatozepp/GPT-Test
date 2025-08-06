@@ -1,0 +1,6 @@
+[gd_resource type="ConfigFile" format=4]
+
+[application]
+config/name="New Godot Game"
+run/main_scene="res://main.tscn"
+config/icon="res://icon.svg"
