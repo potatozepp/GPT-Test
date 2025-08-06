@@ -44,3 +44,13 @@ text = "Hard Mode"
 [node name="EditButton" type="Button" parent="CanvasLayer"]
 visible = false
 text = "Edit Paths"
+
+[node name="RunButton" type="Button" parent="CanvasLayer"]
+visible = false
+offset_top = 40.0
+text = "Start Waves"
+
+[node name="StopButton" type="Button" parent="CanvasLayer"]
+visible = false
+offset_top = 80.0
+text = "Stop Waves"
