@@ -59,20 +59,20 @@ move_up={
 "deadzone": 0.5,
 "events": [{
 "keycode": 69,
-"type": "key",
+"type": "key"
 }]
 }
 move_down={
 "deadzone": 0.5,
 "events": [{
 "keycode": 81,
-"type": "key",
+"type": "key"
 }]
 }
 ui_shift={
 "deadzone": 0.5,
 "events": [{
 "keycode": 4194305,
-"type": "key",
+"type": "key"
 }]
 }
