@@ -22,6 +22,9 @@ place_path={
 "events": [{
 "keycode": 32,
 "type": "key"
+}, {
+"button_index": 1,
+"type": "mouse_button"
 }]
 }
 move_forward={
