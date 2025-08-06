@@ -132,3 +132,8 @@ text = "Place Path"
 visible = false
 offset_left = 240.0
 text = "Place Turret"
+
+[node name="MenuButton" type="Button" parent="CanvasLayer"]
+visible = false
+offset_left = 360.0
+text = "Menu"
