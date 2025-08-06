@@ -73,8 +73,8 @@ func _get_neighbors(pos: Vector3, positions: Array, dist: float) -> Array:
 			neighbors.append(p)
 	return neighbors
 
-func _find_nearest(pos: Vector3, positions: Array[Vector3]) -> Vector3:
-	var nearest := positions[0]
+func _find_nearest(pos: Vector3, positions: Array) -> Vector3:
+	var nearest: Vector3 = positions[0]
 	var min_dist := pos.distance_to(nearest)
 	for p in positions:
 		var d := pos.distance_to(p)

@@ -170,43 +170,21 @@ func toggle_edit() -> void:
 func start_waves() -> void:
 	if not game_loaded:
 		return
-		waves_running = true
-		editing_mode = false
-		edit_button.disabled = true
-		edit_button.text = "Edit"
-		run_button.hide()
-		stop_button.show()
-		placement_mode = ""
-		preview_path.hide()
-		preview_tower.hide()
-		path_button.text = "Place Path"
-		turret_button.text = "Place Turret"
-		spawn_time = spawn_interval
+	waves_running = true
+	editing_mode = false
+	run_button.hide()
+	stop_button.show()
+	placement_mode = ""
+	edit_button.hide()
+	preview_path.hide()
+	preview_tower.hide()
+	path_button.hide()
+	turret_button.hide()
+	spawn_time = spawn_interval
 
 func stop_waves() -> void:
 	if not waves_running:
 		return
-	waves_running = false
-	editing_mode = true
-	edit_button.disabled = false
-	edit_button.text = "Resume"
-	run_button.show()
-	stop_button.hide()
-	if placement_mode == "path":
-		preview_path.show()
-		preview_tower.hide()
-		path_button.text = "Cancel"
-		turret_button.text = "Place Turret"
-	elif placement_mode == "turret":
-		preview_tower.show()
-		preview_path.hide()
-		turret_button.text = "Cancel"
-		path_button.text = "Place Path"
-	else:
-		preview_path.hide()
-		preview_tower.hide()
-		path_button.text = "Place Path"
-		turret_button.text = "Place Turret"
 	spawn_time = spawn_interval
 	var enemies = get_tree().get_nodes_in_group("enemies")
 	for e in enemies:
