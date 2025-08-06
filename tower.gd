@@ -11,12 +11,12 @@ func _physics_process(delta: float) -> void:
 	_cooldown -= delta
 	if _cooldown > 0:
 		return
-        var enemies = get_tree().get_nodes_in_group("enemies")
-        for e in enemies:
-                if position.distance_to(e.position) <= range:
-                        var p = Projectile.new()
-                        p.speed = projectile_speed
-                        p.setup(position, e, miss_radius)
-                        get_parent().add_child(p)
-                        _cooldown = fire_rate
-                        break
+		var enemies = get_tree().get_nodes_in_group("enemies")
+		for e in enemies:
+				if position.distance_to(e.position) <= range:
+						var p = Projectile.new()
+						p.speed = projectile_speed
+						p.setup(position, e, miss_radius)
+						get_parent().add_child(p)
+						_cooldown = fire_rate
+						break
