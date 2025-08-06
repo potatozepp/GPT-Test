@@ -12,8 +12,6 @@ var game_loaded := false
 var waves_running := false
 var editing_mode := false
 var placement_mode := "path"
-const BOUNDS_MIN := Vector2(-25, -25)
-const BOUNDS_MAX := Vector2(25, 25)
 
 @onready var start_menu = $CanvasLayer/Control
 @onready var start_button = $CanvasLayer/Control/VBoxContainer/StartButton
@@ -40,10 +38,6 @@ func _ready() -> void:
 	start_path.position = path_positions[0]
 	start_path.add_to_group("paths")
 	add_child(start_path)
-	var sp_mesh = start_path.get_node("Mesh") as MeshInstance3D
-	var sp_mat := StandardMaterial3D.new()
-	sp_mat.albedo_color = Color(1, 0, 0)
-	sp_mesh.set_surface_override_material(0, sp_mat)
 
 	var tower = TowerScene.instantiate()
 	tower.position = Vector3(-10, 0, 2)
@@ -91,12 +85,9 @@ func start_game() -> void:
 	stop_button.hide()
 	path_button.show()
 	turret_button.show()
-	editing_mode = false
-	edit_button.text = "Edit"
-	preview_path.hide()
-	preview_tower.hide()
-	path_button.disabled = true
-	turret_button.disabled = true
+	editing_mode = true
+	edit_button.text = "Resume"
+	set_mode_path()
 
 	if hard_mode.button_pressed:
 		spawn_interval = 1.0
@@ -156,7 +147,7 @@ func stop_waves() -> void:
 		e.queue_free()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not game_loaded:
+	if not game_loaded or not editing_mode:
 		return
 
 	if event is InputEventKey and event.pressed and event.keycode == KEY_DELETE and selected_node:
@@ -183,24 +174,19 @@ func _unhandled_input(event: InputEvent) -> void:
 				select_node(node.get_parent())
 				return
 		clear_selection()
-		if editing_mode:
-			if placement_mode == "path":
-				add_path_segment(preview_path.position)
-			else:
-				place_turret(preview_tower.position)
+		if placement_mode == "path":
+			add_path_segment(preview_path.position)
+		else:
+			place_turret(preview_tower.position)
 
 func add_path_segment(pos: Vector3) -> void:
 	pos.y = 0
-	if not _within_bounds(pos):
-		return
-	var shape := BoxShape3D.new()
-	shape.size = Vector3(2, 0.25, 2)
-	var params := PhysicsShapeQueryParameters3D.new()
-	params.shape = shape
-	params.transform = Transform3D(Basis(), pos)
-	var space = get_world_3d().direct_space_state
-	if space.intersect_shape(params).size() > 0:
-		return
+	for n in get_tree().get_nodes_in_group("paths"):
+		if n.position == pos:
+			return
+	for t in get_tree().get_nodes_in_group("towers"):
+		if t.position == pos:
+			return
 	path_positions.insert(path_positions.size() - 1, pos)
 	var p = PathScene.instantiate()
 	p.position = pos
@@ -209,16 +195,12 @@ func add_path_segment(pos: Vector3) -> void:
 
 func place_turret(pos: Vector3) -> void:
 	pos.y = 0
-	if not _within_bounds(pos):
-		return
-	var shape := BoxShape3D.new()
-	shape.size = Vector3(1, 1, 1)
-	var params := PhysicsShapeQueryParameters3D.new()
-	params.shape = shape
-	params.transform = Transform3D(Basis(), pos)
-	var space = get_world_3d().direct_space_state
-	if space.intersect_shape(params).size() > 0:
-		return
+	for n in get_tree().get_nodes_in_group("paths"):
+		if n.position == pos:
+			return
+	for tt in get_tree().get_nodes_in_group("towers"):
+		if tt.position == pos:
+			return
 	var t = TowerScene.instantiate()
 	t.position = pos
 	t.add_to_group("towers")
@@ -241,6 +223,7 @@ func clear_selection() -> void:
 			mesh.set_surface_override_material(0, original_material)
 	selected_node = null
 	original_material = null
+
 
 func _process(delta: float) -> void:
 	if editing_mode:
@@ -267,29 +250,11 @@ func update_preview() -> void:
 	pos = pos.snapped(Vector3.ONE)
 	if placement_mode == "path":
 		preview_path.position = pos
-		var shape := BoxShape3D.new()
-		shape.size = Vector3(2, 0.25, 2)
-		var params := PhysicsShapeQueryParameters3D.new()
-		params.shape = shape
-		params.transform = Transform3D(Basis(), pos)
-		var space = get_world_3d().direct_space_state
-		if _within_bounds(pos) and space.intersect_shape(params).size() == 0:
-			preview_path.show()
-		else:
-			preview_path.hide()
+		preview_path.show()
 		preview_tower.hide()
 	else:
 		preview_tower.position = pos
-		var shape_t := BoxShape3D.new()
-		shape_t.size = Vector3(1, 1, 1)
-		var params_t := PhysicsShapeQueryParameters3D.new()
-		params_t.shape = shape_t
-		params_t.transform = Transform3D(Basis(), pos)
-		var space_t = get_world_3d().direct_space_state
-		if _within_bounds(pos) and space_t.intersect_shape(params_t).size() == 0:
-			preview_tower.show()
-		else:
-			preview_tower.hide()
+		preview_tower.show()
 		preview_path.hide()
 
 func set_mode_path() -> void:
@@ -309,6 +274,3 @@ func spawn_enemy() -> void:
 	enemy.position = path_positions[0]
 	add_child(enemy)
 	enemy.add_to_group("enemies")
-
-func _within_bounds(pos: Vector3) -> bool:
-	return pos.x >= BOUNDS_MIN.x and pos.x <= BOUNDS_MAX.x and pos.z >= BOUNDS_MIN.y and pos.z <= BOUNDS_MAX.y
