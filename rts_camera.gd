@@ -14,44 +14,44 @@ extends Camera3D
 var drag_panning := false
 
 func _ready():
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 func _process(delta):
-		var speed = move_speed
-		if Input.is_action_pressed("ui_shift"):
-				speed = fast_speed
-		var dir := Vector2.ZERO
-		if Input.is_action_pressed("move_forward"):
-				dir.y -= 1
-		if Input.is_action_pressed("move_backward"):
-				dir.y += 1
-		if Input.is_action_pressed("move_left"):
-				dir.x -= 1
-		if Input.is_action_pressed("move_right"):
-				dir.x += 1
-		if dir != Vector2.ZERO:
-				var forward = Vector3(basis.z.x, 0, basis.z.z).normalized()
-				var right = Vector3(basis.x.x, 0, basis.x.z).normalized()
-				translate((right * dir.x + forward * dir.y) * speed * delta)
-		_clamp_to_bounds()
+	var speed = move_speed
+	if Input.is_action_pressed("ui_shift"):
+		speed = fast_speed
+	var dir := Vector2.ZERO
+	if Input.is_action_pressed("move_forward"):
+		dir.y -= 1
+	if Input.is_action_pressed("move_backward"):
+		dir.y += 1
+	if Input.is_action_pressed("move_left"):
+		dir.x -= 1
+	if Input.is_action_pressed("move_right"):
+		dir.x += 1
+	if dir != Vector2.ZERO:
+		var forward = Vector3(basis.z.x, 0, basis.z.z).normalized()
+		var right = Vector3(basis.x.x, 0, basis.x.z).normalized()
+		translate((right * dir.x + forward * dir.y) * speed * delta)
+	_clamp_to_bounds()
 
 func _unhandled_input(event):
-		if event is InputEventMouseButton:
-				if event.button_index == MOUSE_BUTTON_RIGHT:
-						drag_panning = event.pressed
-				elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
-						translate(-basis.z.normalized() * zoom_speed)
-						_clamp_to_bounds()
-				elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-						translate(basis.z.normalized() * zoom_speed)
-						_clamp_to_bounds()
-		elif event is InputEventMouseMotion and drag_panning:
-				var right = Vector3(basis.x.x, 0, basis.x.z).normalized()
-				var up = Vector3(basis.z.x, 0, basis.z.z).normalized()
-				translate((-right * event.relative.x + -up * event.relative.y) * pan_speed)
-				_clamp_to_bounds()
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_RIGHT:
+			drag_panning = event.pressed
+		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			translate(-basis.z.normalized() * zoom_speed)
+			_clamp_to_bounds()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			translate(basis.z.normalized() * zoom_speed)
+			_clamp_to_bounds()
+	elif event is InputEventMouseMotion and drag_panning:
+		var right = Vector3(basis.x.x, 0, basis.x.z).normalized()
+		var up = Vector3(basis.z.x, 0, basis.z.z).normalized()
+		translate((-right * event.relative.x + -up * event.relative.y) * pan_speed)
+		_clamp_to_bounds()
 
 func _clamp_to_bounds():
-		position.x = clamp(position.x, min_x, max_x)
-		position.z = clamp(position.z, min_z, max_z)
-		position.y = clamp(position.y, min_y, max_y)
+	position.x = clamp(position.x, min_x, max_x)
+	position.z = clamp(position.z, min_z, max_z)
+	position.y = clamp(position.y, min_y, max_y)
