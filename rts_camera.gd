@@ -7,65 +7,83 @@ extends Camera3D
 @export var zoom_speed := 2.0
 @export var edge_margin := 10
 @export var edge_speed := 15.0
+@export var min_x := -30.0
+@export var max_x := 30.0
+@export var min_z := -30.0
+@export var max_z := 30.0
 
 var yaw := 0.0
-var pitch := -0.3
-var middle_panning := false
+var drag_panning := false
+var rotating := false
+var start_height := 0.0
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	yaw = rotation.y
-	pitch = rotation.x
+	start_height = position.y
 
 func _process(delta):
 	var speed = move_speed
 	if Input.is_action_pressed("ui_shift"):
 		speed = fast_speed
-	var dir = Vector3.ZERO
+	var dir := Vector2.ZERO
 	if Input.is_action_pressed("move_forward"):
-		dir.z -= 1
+		dir.y -= 1
 	if Input.is_action_pressed("move_backward"):
-		dir.z += 1
+		dir.y += 1
 	if Input.is_action_pressed("move_left"):
 		dir.x -= 1
 	if Input.is_action_pressed("move_right"):
 		dir.x += 1
-	if Input.is_action_pressed("move_up"):
-		dir.y += 1
-	if Input.is_action_pressed("move_down"):
-		dir.y -= 1
-	if dir != Vector3.ZERO:
-		translate(basis * dir.normalized() * speed * delta)
+	if dir != Vector2.ZERO:
+		var forward = Vector3(basis.z.x, 0, basis.z.z).normalized()
+		var right = Vector3(basis.x.x, 0, basis.x.z).normalized()
+		translate((right * dir.x + forward * dir.y) * speed * delta)
+	_clamp_to_bounds()
 
 ## Edge Movement
 
 	if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
 		var mouse_pos = get_viewport().get_mouse_position()
 		var size = get_viewport().get_visible_rect().size
+		var forward = Vector3(basis.z.x, 0, basis.z.z).normalized()
+		var right = Vector3(basis.x.x, 0, basis.x.z).normalized()
 		if mouse_pos.x <= edge_margin:
-			translate(-basis.x * edge_speed * delta)
+			translate(-right * edge_speed * delta)
 		elif mouse_pos.x >= size.x - edge_margin:
-			translate(basis.x * edge_speed * delta)
+			translate(right * edge_speed * delta)
 		if mouse_pos.y <= edge_margin:
-			translate(-basis.z * edge_speed * delta)
+			translate(-forward * edge_speed * delta)
 		elif mouse_pos.y >= size.y - edge_margin:
-			translate(basis.z * edge_speed * delta)
+			translate(forward * edge_speed * delta)
+		_clamp_to_bounds()
 
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_RIGHT:
+		if event.button_index == MOUSE_BUTTON_MIDDLE:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED if event.pressed else Input.MOUSE_MODE_VISIBLE)
-		elif event.button_index == MOUSE_BUTTON_MIDDLE:
-			middle_panning = event.pressed
+			rotating = event.pressed
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			drag_panning = event.pressed
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			translate(-basis.z * zoom_speed)
+			var forward = Vector3(basis.z.x, 0, basis.z.z).normalized()
+			translate(forward * zoom_speed)
+			_clamp_to_bounds()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			translate(basis.z * zoom_speed)
+			var forward = Vector3(basis.z.x, 0, basis.z.z).normalized()
+			translate(-forward * zoom_speed)
+			_clamp_to_bounds()
 	elif event is InputEventMouseMotion:
-		if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+		if rotating:
 			yaw -= event.relative.x * rotation_speed
-			pitch = clamp(pitch - event.relative.y * rotation_speed, -1.2, 0.2)
 			rotation.y = yaw
-			rotation.x = pitch
-		elif middle_panning:
-			translate((basis.x * event.relative.x + basis.z * event.relative.y) * pan_speed)
+		elif drag_panning:
+			var right = Vector3(basis.x.x, 0, basis.x.z).normalized()
+			var up = Vector3(basis.z.x, 0, basis.z.z).normalized()
+			translate((-right * event.relative.x + -up * event.relative.y) * pan_speed)
+			_clamp_to_bounds()
+
+func _clamp_to_bounds():
+	position.y = start_height
+	position.x = clamp(position.x, min_x, max_x)
+	position.z = clamp(position.z, min_z, max_z)
