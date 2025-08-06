@@ -83,15 +83,27 @@ text = "Vibration"
 layout_mode = 2
 text = "Back"
 
-[node name="SelectionPanel" type="Control" parent="CanvasLayer"]
+[node name="SelectionPanel" type="ColorRect" parent="CanvasLayer"]
 visible = false
 layout_mode = 3
-anchors_preset = 0
-offset_right = 120.0
-offset_bottom = 120.0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -60.0
+offset_right = 60.0
+offset_bottom = 60.0
+color = Color(0, 0, 0, 0.4)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/SelectionPanel"]
-layout_mode = 0
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
 
 [node name="SellButton" type="Button" parent="CanvasLayer/SelectionPanel/VBoxContainer"]
 layout_mode = 2
