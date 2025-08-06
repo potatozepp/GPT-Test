@@ -38,3 +38,8 @@ text = "Start Game"
 [node name="HardMode" type="CheckBox" parent="CanvasLayer/Control/VBoxContainer"]
 layout_mode = 2
 text = "Hard Mode"
+
+[node name="EditButton" type="Button" parent="CanvasLayer"]
+layout_mode = 2
+text = "Edit Paths"
+visible = false
