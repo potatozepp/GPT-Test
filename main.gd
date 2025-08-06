@@ -1,5 +1,12 @@
 extends Node3D
 
+const MIN_X := -30.0
+const MAX_X := 30.0
+const MIN_Z := -30.0
+const MAX_Z := 30.0
+const PATH_HALF := Vector2(1, 1)
+const TOWER_HALF := Vector2(0.5, 0.5)
+
 var EnemyScene = preload("res://assets/models/enemy.tscn")
 var TowerScene = preload("res://assets/models/tower.tscn")
 var PathScene = preload("res://assets/models/path.tscn")
@@ -26,6 +33,12 @@ var preview_path
 var preview_tower
 var selected_node: Node3D
 var original_material: Material
+
+func in_bounds(pos: Vector3) -> bool:
+	return pos.x >= MIN_X and pos.x <= MAX_X and pos.z >= MIN_Z and pos.z <= MAX_Z
+
+func intersects(a_pos: Vector3, a_half: Vector2, b_pos: Vector3, b_half: Vector2) -> bool:
+	return abs(a_pos.x - b_pos.x) < a_half.x + b_half.x and abs(a_pos.z - b_pos.z) < a_half.y + b_half.y
 
 func _ready() -> void:
 	var core = CoreScene.instantiate()
@@ -85,9 +98,12 @@ func start_game() -> void:
 	stop_button.hide()
 	path_button.show()
 	turret_button.show()
-	editing_mode = true
-	edit_button.text = "Resume"
-	set_mode_path()
+	editing_mode = false
+	edit_button.text = "Edit"
+	path_button.disabled = true
+	turret_button.disabled = true
+	preview_path.hide()
+	preview_tower.hide()
 
 	if hard_mode.button_pressed:
 		spawn_interval = 1.0
@@ -147,10 +163,10 @@ func stop_waves() -> void:
 		e.queue_free()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not game_loaded or not editing_mode:
+	if not game_loaded:
 		return
 
-	if event is InputEventKey and event.pressed and event.keycode == KEY_DELETE and selected_node:
+	if event is InputEventKey and event.pressed and event.keycode == KEY_DELETE and selected_node and editing_mode:
 		if selected_node.is_in_group("paths"):
 			path_positions.erase(selected_node.position)
 		selected_node.queue_free()
@@ -174,18 +190,21 @@ func _unhandled_input(event: InputEvent) -> void:
 				select_node(node.get_parent())
 				return
 		clear_selection()
-		if placement_mode == "path":
-			add_path_segment(preview_path.position)
-		else:
-			place_turret(preview_tower.position)
+		if editing_mode:
+			if placement_mode == "path":
+				add_path_segment(preview_path.position)
+			else:
+				place_turret(preview_tower.position)
 
 func add_path_segment(pos: Vector3) -> void:
 	pos.y = 0
+	if not in_bounds(pos):
+		return
 	for n in get_tree().get_nodes_in_group("paths"):
-		if n.position == pos:
+		if intersects(pos, PATH_HALF, n.position, PATH_HALF):
 			return
 	for t in get_tree().get_nodes_in_group("towers"):
-		if t.position == pos:
+		if intersects(pos, PATH_HALF, t.position, TOWER_HALF):
 			return
 	path_positions.insert(path_positions.size() - 1, pos)
 	var p = PathScene.instantiate()
@@ -195,11 +214,13 @@ func add_path_segment(pos: Vector3) -> void:
 
 func place_turret(pos: Vector3) -> void:
 	pos.y = 0
+	if not in_bounds(pos):
+		return
 	for n in get_tree().get_nodes_in_group("paths"):
-		if n.position == pos:
+		if intersects(pos, TOWER_HALF, n.position, PATH_HALF):
 			return
 	for tt in get_tree().get_nodes_in_group("towers"):
-		if tt.position == pos:
+		if intersects(pos, TOWER_HALF, tt.position, TOWER_HALF):
 			return
 	var t = TowerScene.instantiate()
 	t.position = pos
@@ -224,7 +245,6 @@ func clear_selection() -> void:
 	selected_node = null
 	original_material = null
 
-
 func _process(delta: float) -> void:
 	if editing_mode:
 		update_preview()
@@ -248,6 +268,8 @@ func update_preview() -> void:
 	var t = -origin.y / dir.y
 	var pos = origin + dir * t
 	pos = pos.snapped(Vector3.ONE)
+	pos.x = clamp(pos.x, MIN_X, MAX_X)
+	pos.z = clamp(pos.z, MIN_Z, MAX_Z)
 	if placement_mode == "path":
 		preview_path.position = pos
 		preview_path.show()
