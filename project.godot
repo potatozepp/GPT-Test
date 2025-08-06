@@ -14,3 +14,6 @@ config/name="New Godot Game"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.4")
 config/icon="res://icon.svg"
+
+[input]
+place_path={"deadzone":0.5,"events":[{"type":"key","keycode":32}]}
