@@ -10,6 +10,7 @@ extends Camera3D
 
 var yaw := 0.0
 var pitch := -0.3
+var middle_panning := false
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -38,24 +39,24 @@ func _process(delta):
 
 ## Edge Movement
 
-	# if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
-	# 	var mouse_pos = get_viewport().get_mouse_position()
-	# 	var size = get_viewport().get_visible_rect().size
-	# 	if mouse_pos.x <= edge_margin:
-	# 		translate(-basis.x * edge_speed * delta)
-	# 	elif mouse_pos.x >= size.x - edge_margin:
-	# 		translate(basis.x * edge_speed * delta)
-	# 	if mouse_pos.y <= edge_margin:
-	# 		translate(-basis.z * edge_speed * delta)
-	# 	elif mouse_pos.y >= size.y - edge_margin:
-	# 		translate(basis.z * edge_speed * delta)
+	if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
+		var mouse_pos = get_viewport().get_mouse_position()
+		var size = get_viewport().get_visible_rect().size
+		if mouse_pos.x <= edge_margin:
+			translate(-basis.x * edge_speed * delta)
+		elif mouse_pos.x >= size.x - edge_margin:
+			translate(basis.x * edge_speed * delta)
+		if mouse_pos.y <= edge_margin:
+			translate(-basis.z * edge_speed * delta)
+		elif mouse_pos.y >= size.y - edge_margin:
+			translate(basis.z * edge_speed * delta)
 
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED if event.pressed else Input.MOUSE_MODE_VISIBLE)
 		elif event.button_index == MOUSE_BUTTON_MIDDLE:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED if event.pressed else Input.MOUSE_MODE_VISIBLE)
+			middle_panning = event.pressed
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			translate(-basis.z * zoom_speed)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
@@ -66,5 +67,5 @@ func _unhandled_input(event):
 			pitch = clamp(pitch - event.relative.y * rotation_speed, -1.2, 0.2)
 			rotation.y = yaw
 			rotation.x = pitch
-		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
+		elif middle_panning:
 			translate((basis.x * event.relative.x + basis.z * event.relative.y) * pan_speed)

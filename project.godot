@@ -32,12 +32,18 @@ move_forward={
 "events": [{
 "keycode": 87,
 "type": "key"
+}, {
+"keycode": 4194320,
+"type": "key"
 }]
 }
 move_backward={
 "deadzone": 0.5,
 "events": [{
 "keycode": 83,
+"type": "key"
+}, {
+"keycode": 4194322,
 "type": "key"
 }]
 }
@@ -46,12 +52,18 @@ move_left={
 "events": [{
 "keycode": 65,
 "type": "key"
+}, {
+"keycode": 4194319,
+"type": "key"
 }]
 }
 move_right={
 "deadzone": 0.5,
 "events": [{
 "keycode": 68,
+"type": "key"
+}, {
+"keycode": 4194321,
 "type": "key"
 }]
 }
