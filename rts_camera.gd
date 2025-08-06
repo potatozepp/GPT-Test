@@ -36,17 +36,19 @@ func _process(delta):
 	if dir != Vector3.ZERO:
 		translate(basis * dir.normalized() * speed * delta)
 
-	if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
-		var mouse_pos = get_viewport().get_mouse_position()
-		var size = get_viewport().get_visible_rect().size
-		if mouse_pos.x <= edge_margin:
-			translate(-basis.x * edge_speed * delta)
-		elif mouse_pos.x >= size.x - edge_margin:
-			translate(basis.x * edge_speed * delta)
-		if mouse_pos.y <= edge_margin:
-			translate(-basis.z * edge_speed * delta)
-		elif mouse_pos.y >= size.y - edge_margin:
-			translate(basis.z * edge_speed * delta)
+## Edge Movement
+
+	# if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
+	# 	var mouse_pos = get_viewport().get_mouse_position()
+	# 	var size = get_viewport().get_visible_rect().size
+	# 	if mouse_pos.x <= edge_margin:
+	# 		translate(-basis.x * edge_speed * delta)
+	# 	elif mouse_pos.x >= size.x - edge_margin:
+	# 		translate(basis.x * edge_speed * delta)
+	# 	if mouse_pos.y <= edge_margin:
+	# 		translate(-basis.z * edge_speed * delta)
+	# 	elif mouse_pos.y >= size.y - edge_margin:
+	# 		translate(basis.z * edge_speed * delta)
 
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
@@ -65,4 +67,4 @@ func _unhandled_input(event):
 			rotation.y = yaw
 			rotation.x = pitch
 		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
-			translate((-basis.x * event.relative.x - basis.z * event.relative.y) * pan_speed)
+			translate((basis.x * event.relative.x + basis.z * event.relative.y) * pan_speed)
