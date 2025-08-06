@@ -1,9 +1,17 @@
-[gd_scene load_steps=2 format=3 uid="uid://pathseg"]
+[gd_scene load_steps=3 format=3 uid="uid://pathseg"]
 
 [sub_resource type="BoxMesh" id="1"]
+size = Vector3(2, 0.25, 2)
+
+[sub_resource type="BoxShape3D" id="2"]
 size = Vector3(2, 0.25, 2)
 
 [node name="Path" type="Node3D"]
 
 [node name="Mesh" type="MeshInstance3D" parent="."]
 mesh = SubResource("1")
+
+[node name="StaticBody" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape" type="CollisionShape3D" parent="StaticBody"]
+shape = SubResource("2")
