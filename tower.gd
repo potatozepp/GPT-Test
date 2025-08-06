@@ -1,10 +1,10 @@
-extends Node2D
+extends Node3D
 
-@export var range := 100
+@export var range := 10.0
 @export var fire_rate := 1.0
 var _cooldown := 0.0
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
     _cooldown -= delta
     if _cooldown > 0:
         return
