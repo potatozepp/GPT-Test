@@ -24,3 +24,31 @@ place_path={
 "type": "key"
 }]
 }
+move_forward={
+"deadzone": 0.5,
+"events": [{
+"keycode": 87,
+"type": "key"
+}]
+}
+move_backward={
+"deadzone": 0.5,
+"events": [{
+"keycode": 83,
+"type": "key"
+}]
+}
+move_left={
+"deadzone": 0.5,
+"events": [{
+"keycode": 65,
+"type": "key"
+}]
+}
+move_right={
+"deadzone": 0.5,
+"events": [{
+"keycode": 68,
+"type": "key"
+}]
+}
