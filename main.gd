@@ -152,22 +152,22 @@ func exit_game() -> void:
 	get_tree().quit()
 
 func toggle_edit() -> void:
-        if waves_running:
-                return
-        editing_mode = not editing_mode
-        edit_button.text = "Resume" if editing_mode else "Edit"
-        if not editing_mode:
-                placement_mode = ""
-                preview_path.hide()
-                preview_tower.hide()
-                path_button.text = "Place Path"
-                turret_button.text = "Place Turret"
-                clear_selection()
-        path_button.disabled = not editing_mode
-        turret_button.disabled = not editing_mode
-        var enemies = get_tree().get_nodes_in_group("enemies")
-        for e in enemies:
-                e.set_physics_process(not editing_mode)
+	if waves_running:
+		return
+	editing_mode = not editing_mode
+	edit_button.text = "Resume" if editing_mode else "Edit"
+	if not editing_mode:
+		placement_mode = ""
+		preview_path.hide()
+		preview_tower.hide()
+		path_button.text = "Place Path"
+		turret_button.text = "Place Turret"
+		clear_selection()
+	path_button.disabled = not editing_mode
+	turret_button.disabled = not editing_mode
+	var enemies = get_tree().get_nodes_in_group("enemies")
+	for e in enemies:
+		e.set_physics_process(not editing_mode)
 
 func start_waves() -> void:
 	if not game_loaded:
@@ -193,42 +193,42 @@ func stop_waves() -> void:
 		e.queue_free()
 
 func _unhandled_input(event: InputEvent) -> void:
-        if not game_loaded:
-                return
+	if not game_loaded:
+		return
 
-        if event is InputEventKey and event.pressed and event.keycode == KEY_DELETE and selected_node and editing_mode:
-                if selected_node.is_in_group("paths"):
-                        path_positions.erase(selected_node.position)
-                selected_node.queue_free()
-                clear_selection()
-                return
+	if event is InputEventKey and event.pressed and event.keycode == KEY_DELETE and selected_node and editing_mode:
+		if selected_node.is_in_group("paths"):
+			path_positions.erase(selected_node.position)
+		selected_node.queue_free()
+		clear_selection()
+		return
 
-        if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-                if editing_mode and placement_mode != "":
-                        if placement_mode == "path":
-                                add_path_segment(preview_path.position)
-                        elif placement_mode == "turret":
-                                place_turret(preview_tower.position)
-                        elif placement_mode == "path_move" and moving_node:
-                                move_path_segment(preview_path.position)
-                        elif placement_mode == "turret_move" and moving_node:
-                                move_turret(preview_tower.position)
-                        return
-                var mouse_pos = event.position
-                var origin = camera.project_ray_origin(mouse_pos)
-                var dir = camera.project_ray_normal(mouse_pos)
-                var space = get_world_3d().direct_space_state
-                var query = PhysicsRayQueryParameters3D.create(origin, origin + dir * 1000)
-                var result = space.intersect_ray(query)
-                if result:
-                        var node = result.collider
-                        if node.is_in_group("paths") or node.is_in_group("towers"):
-                                select_node(node)
-                                return
-                        elif node.get_parent() and (node.get_parent().is_in_group("paths") or node.get_parent().is_in_group("towers")):
-                                select_node(node.get_parent())
-                                return
-                clear_selection()
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if editing_mode and placement_mode != "":
+			if placement_mode == "path":
+				add_path_segment(preview_path.position)
+			elif placement_mode == "turret":
+				place_turret(preview_tower.position)
+			elif placement_mode == "path_move" and moving_node:
+				move_path_segment(preview_path.position)
+			elif placement_mode == "turret_move" and moving_node:
+				move_turret(preview_tower.position)
+			return
+		var mouse_pos = event.position
+		var origin = camera.project_ray_origin(mouse_pos)
+		var dir = camera.project_ray_normal(mouse_pos)
+		var space = get_world_3d().direct_space_state
+		var query = PhysicsRayQueryParameters3D.create(origin, origin + dir * 1000)
+		var result = space.intersect_ray(query)
+		if result:
+			var node = result.collider
+			if node.is_in_group("paths") or node.is_in_group("towers"):
+				select_node(node)
+				return
+			elif node.get_parent() and (node.get_parent().is_in_group("paths") or node.get_parent().is_in_group("towers")):
+				select_node(node.get_parent())
+				return
+		clear_selection()
 
 func add_path_segment(pos: Vector3) -> void:
 	pos.y = 0
@@ -265,45 +265,45 @@ func place_turret(pos: Vector3) -> void:
 			return
 	var t = TowerScene.instantiate()
 	t.position = pos
-        t.add_to_group("towers")
-        add_child(t)
+	t.add_to_group("towers")
+	add_child(t)
 
 func move_turret(pos: Vector3) -> void:
-        if not moving_node:
-                return
-        pos.y = 0
-        if not in_bounds(pos):
-                return
-        for n in get_tree().get_nodes_in_group("paths"):
-                if intersects(pos, TOWER_HALF + Vector2(TOWER_PATH_PADDING, TOWER_PATH_PADDING), n.position, PATH_HALF):
-                        return
-        for tt in get_tree().get_nodes_in_group("towers"):
-                if tt != moving_node and intersects(pos, TOWER_HALF, tt.position, TOWER_HALF):
-                        return
-        moving_node.position = pos
-        moving_node = null
-        placement_mode = ""
-        preview_tower.hide()
+	if not moving_node:
+		return
+	pos.y = 0
+	if not in_bounds(pos):
+		return
+	for n in get_tree().get_nodes_in_group("paths"):
+		if intersects(pos, TOWER_HALF + Vector2(TOWER_PATH_PADDING, TOWER_PATH_PADDING), n.position, PATH_HALF):
+			return
+	for tt in get_tree().get_nodes_in_group("towers"):
+		if tt != moving_node and intersects(pos, TOWER_HALF, tt.position, TOWER_HALF):
+			return
+	moving_node.position = pos
+	moving_node = null
+	placement_mode = ""
+	preview_tower.hide()
 
 func move_path_segment(pos: Vector3) -> void:
-        if not moving_node:
-                return
-        pos.y = 0
-        if not in_bounds(pos):
-                return
-        for n in get_tree().get_nodes_in_group("paths"):
-                if n != moving_node and intersects(pos, PATH_HALF, n.position, PATH_HALF):
-                        return
-        for t in get_tree().get_nodes_in_group("towers"):
-                if intersects(pos, PATH_HALF, t.position, TOWER_HALF):
-                        return
-        var idx = path_positions.find(moving_node.position)
-        if idx != -1:
-                path_positions[idx] = pos
-        moving_node.position = pos
-        moving_node = null
-        placement_mode = ""
-        preview_path.hide()
+	if not moving_node:
+		return
+	pos.y = 0
+	if not in_bounds(pos):
+		return
+	for n in get_tree().get_nodes_in_group("paths"):
+		if n != moving_node and intersects(pos, PATH_HALF, n.position, PATH_HALF):
+			return
+	for t in get_tree().get_nodes_in_group("towers"):
+		if intersects(pos, PATH_HALF, t.position, TOWER_HALF):
+			return
+	var idx = path_positions.find(moving_node.position)
+	if idx != -1:
+		path_positions[idx] = pos
+	moving_node.position = pos
+	moving_node = null
+	placement_mode = ""
+	preview_path.hide()
 
 func select_node(node: Node3D) -> void:
 	clear_selection()
@@ -324,16 +324,16 @@ func select_node(node: Node3D) -> void:
 		upgrade_button.hide()
 		move_button.show()
 		delete_button.show()
-        selection_panel.show()
+		selection_panel.show()
 
 func clear_selection() -> void:
-        if selected_node:
-                var mesh = selected_node.get_node_or_null("Mesh") as MeshInstance3D
-                if mesh and original_material:
-                        mesh.set_surface_override_material(0, original_material)
-        selected_node = null
-        original_material = null
-        selection_panel.hide()
+	if selected_node:
+		var mesh = selected_node.get_node_or_null("Mesh") as MeshInstance3D
+		if mesh and original_material:
+			mesh.set_surface_override_material(0, original_material)
+	selected_node = null
+	original_material = null
+	selection_panel.hide()
 
 func _on_sell_pressed() -> void:
 	if selected_node and selected_node.is_in_group("towers"):
@@ -345,20 +345,20 @@ func _on_upgrade_pressed() -> void:
 		print("Upgrade not implemented")
 
 func _on_move_pressed() -> void:
-        if not selected_node:
-                return
-        moving_node = selected_node
-        if selected_node.is_in_group("paths"):
-                placement_mode = "path_move"
-                preview_path.position = selected_node.position
-                preview_path.show()
-                preview_tower.hide()
-        elif selected_node.is_in_group("towers"):
-                placement_mode = "turret_move"
-                preview_tower.position = selected_node.position
-                preview_tower.show()
-                preview_path.hide()
-        clear_selection()
+	if not selected_node:
+		return
+	moving_node = selected_node
+	if selected_node.is_in_group("paths"):
+		placement_mode = "path_move"
+		preview_path.position = selected_node.position
+		preview_path.show()
+		preview_tower.hide()
+	elif selected_node.is_in_group("towers"):
+		placement_mode = "turret_move"
+		preview_tower.position = selected_node.position
+		preview_tower.show()
+		preview_path.hide()
+	clear_selection()
 
 func _on_delete_pressed() -> void:
 	if selected_node and selected_node.is_in_group("paths"):
@@ -391,45 +391,45 @@ func update_preview() -> void:
 	pos = pos.snapped(Vector3.ONE)
 	pos.x = clamp(pos.x, MIN_X, MAX_X)
 	pos.z = clamp(pos.z, MIN_Z, MAX_Z)
-        if placement_mode == "path" or placement_mode == "path_move":
-                preview_path.position = pos
-                preview_path.show()
-                preview_tower.hide()
-        elif placement_mode == "turret" or placement_mode == "turret_move":
-                preview_tower.position = pos
-                preview_tower.show()
-                preview_path.hide()
-        else:
-                preview_path.hide()
-                preview_tower.hide()
+	if placement_mode == "path" or placement_mode == "path_move":
+		preview_path.position = pos
+		preview_path.show()
+		preview_tower.hide()
+	elif placement_mode == "turret" or placement_mode == "turret_move":
+		preview_tower.position = pos
+		preview_tower.show()
+		preview_path.hide()
+	else:
+		preview_path.hide()
+		preview_tower.hide()
 
 func set_mode_path() -> void:
-        if placement_mode == "path":
-                placement_mode = ""
-                preview_path.hide()
-                path_button.text = "Place Path"
-        else:
-                placement_mode = "path"
-                path_button.text = "Cancel"
-                turret_button.text = "Place Turret"
-                preview_tower.hide()
-                if editing_mode:
-                        preview_path.show()
-                clear_selection()
+	if placement_mode == "path":
+		placement_mode = ""
+		preview_path.hide()
+		path_button.text = "Place Path"
+	else:
+		placement_mode = "path"
+		path_button.text = "Cancel"
+		turret_button.text = "Place Turret"
+		preview_tower.hide()
+		if editing_mode:
+			preview_path.show()
+		clear_selection()
 
 func set_mode_turret() -> void:
-        if placement_mode == "turret":
-                placement_mode = ""
-                preview_tower.hide()
-                turret_button.text = "Place Turret"
-        else:
-                placement_mode = "turret"
-                turret_button.text = "Cancel"
-                path_button.text = "Place Path"
-                preview_path.hide()
-                if editing_mode:
-                        preview_tower.show()
-                clear_selection()
+	if placement_mode == "turret":
+		placement_mode = ""
+		preview_tower.hide()
+		turret_button.text = "Place Turret"
+	else:
+		placement_mode = "turret"
+		turret_button.text = "Cancel"
+		path_button.text = "Place Path"
+		preview_path.hide()
+		if editing_mode:
+			preview_tower.show()
+		clear_selection()
 
 func _on_menu_pressed() -> void:
 	get_tree().reload_current_scene()

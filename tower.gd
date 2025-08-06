@@ -2,8 +2,8 @@ extends Node3D
 
 @export var range := 10.0
 @export var fire_rate := 1.0
-@export var miss_radius := 1.5
-@export var projectile_speed := 5.0
+@export var miss_radius := 0.0
+@export var projectile_speed := 100.0
 var _cooldown := 0.0
 const Projectile = preload("res://projectile.gd")
 

@@ -56,7 +56,7 @@ func _find_path(start: Vector3, goal: Vector3, positions: Array, dist: float) ->
 				came_from[next] = current
 	var result: Array = []
 	if came_from.has(goal):
-		var node: Vector3 = goal
+		var node := goal
 		while node != null:
 			result.insert(0, node)
 			node = came_from[node]
