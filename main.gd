@@ -39,10 +39,10 @@ func _ready() -> void:
 	start_path.add_to_group("paths")
 	add_child(start_path)
 
-        var tower = TowerScene.instantiate()
-        tower.position = Vector3(-10, 0, 2)
-        add_child(tower)
-        tower.add_to_group("towers")
+	var tower = TowerScene.instantiate()
+	tower.position = Vector3(-10, 0, 2)
+	add_child(tower)
+	tower.add_to_group("towers")
 
 	preview_path = PathScene.instantiate()
 	var mesh = preview_path.get_node("Mesh") as MeshInstance3D
@@ -74,8 +74,8 @@ func _ready() -> void:
 	stop_button.visible = false
 	path_button.visible = false
 	turret_button.visible = false
-        set_process(true)
-        set_process_unhandled_input(true)
+	set_process(true)
+	set_process_unhandled_input(true)
 
 func start_game() -> void:
 	game_loaded = true
@@ -146,84 +146,83 @@ func stop_waves() -> void:
 	for e in enemies:
 		e.queue_free()
 
-func _input(event: InputEvent) -> void:
 func _unhandled_input(event: InputEvent) -> void:
-        if not game_loaded or not editing_mode:
-                return
+	if not game_loaded or not editing_mode:
+		return
 
-        if event is InputEventKey and event.pressed and event.keycode == KEY_DELETE and selected_node:
-                if selected_node.is_in_group("paths"):
-                        path_positions.erase(selected_node.position)
-                selected_node.queue_free()
-                selected_node = null
-                original_material = null
-                return
+	if event is InputEventKey and event.pressed and event.keycode == KEY_DELETE and selected_node:
+		if selected_node.is_in_group("paths"):
+			path_positions.erase(selected_node.position)
+		selected_node.queue_free()
+		selected_node = null
+		original_material = null
+		return
 
-        if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-                var mouse_pos = event.position
-                var origin = camera.project_ray_origin(mouse_pos)
-                var dir = camera.project_ray_normal(mouse_pos)
-                var space = get_world_3d().direct_space_state
-                var query = PhysicsRayQueryParameters3D.create(origin, origin + dir * 1000)
-                var result = space.intersect_ray(query)
-                if result:
-                        var node = result.collider
-                        if node.is_in_group("paths") or node.is_in_group("towers"):
-                                select_node(node)
-                                return
-                        elif node.get_parent() and (node.get_parent().is_in_group("paths") or node.get_parent().is_in_group("towers")):
-                                select_node(node.get_parent())
-                                return
-                clear_selection()
-                if placement_mode == "path":
-                        add_path_segment(preview_path.position)
-                else:
-                        place_turret(preview_tower.position)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		var mouse_pos = event.position
+		var origin = camera.project_ray_origin(mouse_pos)
+		var dir = camera.project_ray_normal(mouse_pos)
+		var space = get_world_3d().direct_space_state
+		var query = PhysicsRayQueryParameters3D.create(origin, origin + dir * 1000)
+		var result = space.intersect_ray(query)
+		if result:
+			var node = result.collider
+			if node.is_in_group("paths") or node.is_in_group("towers"):
+				select_node(node)
+				return
+			elif node.get_parent() and (node.get_parent().is_in_group("paths") or node.get_parent().is_in_group("towers")):
+				select_node(node.get_parent())
+				return
+		clear_selection()
+		if placement_mode == "path":
+			add_path_segment(preview_path.position)
+		else:
+			place_turret(preview_tower.position)
 
 func add_path_segment(pos: Vector3) -> void:
-        pos.y = 0
-        for n in get_tree().get_nodes_in_group("paths"):
-                if n.position == pos:
-                        return
-        for t in get_tree().get_nodes_in_group("towers"):
-                if t.position == pos:
-                        return
-        path_positions.insert(path_positions.size() - 1, pos)
-        var p = PathScene.instantiate()
-        p.position = pos
-        p.add_to_group("paths")
-        add_child(p)
+	pos.y = 0
+	for n in get_tree().get_nodes_in_group("paths"):
+		if n.position == pos:
+			return
+	for t in get_tree().get_nodes_in_group("towers"):
+		if t.position == pos:
+			return
+	path_positions.insert(path_positions.size() - 1, pos)
+	var p = PathScene.instantiate()
+	p.position = pos
+	p.add_to_group("paths")
+	add_child(p)
 
 func place_turret(pos: Vector3) -> void:
-        pos.y = 0
-        for n in get_tree().get_nodes_in_group("paths"):
-                if n.position == pos:
-                        return
-        for tt in get_tree().get_nodes_in_group("towers"):
-                if tt.position == pos:
-                        return
-        var t = TowerScene.instantiate()
-        t.position = pos
-        t.add_to_group("towers")
-        add_child(t)
+	pos.y = 0
+	for n in get_tree().get_nodes_in_group("paths"):
+		if n.position == pos:
+			return
+	for tt in get_tree().get_nodes_in_group("towers"):
+		if tt.position == pos:
+			return
+	var t = TowerScene.instantiate()
+	t.position = pos
+	t.add_to_group("towers")
+	add_child(t)
 
 func select_node(node: Node3D) -> void:
-        clear_selection()
-        selected_node = node
-        var mesh = node.get_node_or_null("Mesh") as MeshInstance3D
-        if mesh:
-                original_material = mesh.get_active_material(0)
-                var mat := StandardMaterial3D.new()
-                mat.albedo_color = Color(1, 0, 0)
-                mesh.set_surface_override_material(0, mat)
+	clear_selection()
+	selected_node = node
+	var mesh = node.get_node_or_null("Mesh") as MeshInstance3D
+	if mesh:
+		original_material = mesh.get_active_material(0)
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(1, 0, 0)
+		mesh.set_surface_override_material(0, mat)
 
 func clear_selection() -> void:
-        if selected_node:
-                var mesh = selected_node.get_node_or_null("Mesh") as MeshInstance3D
-                if mesh and original_material:
-                        mesh.set_surface_override_material(0, original_material)
-        selected_node = null
-        original_material = null
+	if selected_node:
+		var mesh = selected_node.get_node_or_null("Mesh") as MeshInstance3D
+		if mesh and original_material:
+			mesh.set_surface_override_material(0, original_material)
+	selected_node = null
+	original_material = null
 
 
 func _process(delta: float) -> void:
