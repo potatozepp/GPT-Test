@@ -228,7 +228,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			elif node.get_parent() and (node.get_parent().is_in_group("paths") or node.get_parent().is_in_group("towers")):
 				select_node(node.get_parent())
 				return
-		clear_selection()
+		else:
+			clear_selection()
 
 func add_path_segment(pos: Vector3) -> void:
 	pos.y = 0
@@ -324,7 +325,7 @@ func select_node(node: Node3D) -> void:
 		upgrade_button.hide()
 		move_button.show()
 		delete_button.show()
-		selection_panel.show()
+	selection_panel.show()
 
 func clear_selection() -> void:
 	if selected_node:
@@ -342,7 +343,7 @@ func _on_sell_pressed() -> void:
 
 func _on_upgrade_pressed() -> void:
 	if selected_node and selected_node.is_in_group("towers"):
-		print("Upgrade not implemented")
+		selected_node.call("upgrade")
 
 func _on_move_pressed() -> void:
 	if not selected_node:
