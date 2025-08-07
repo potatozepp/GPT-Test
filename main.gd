@@ -228,8 +228,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			elif node.get_parent() and (node.get_parent().is_in_group("paths") or node.get_parent().is_in_group("towers")):
 				select_node(node.get_parent())
 				return
-		else:
-			clear_selection()
+		clear_selection()
 
 func add_path_segment(pos: Vector3) -> void:
 	pos.y = 0
