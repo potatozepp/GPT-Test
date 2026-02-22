@@ -1,13 +1,16 @@
 extends Node3D
 
-const MIN_X := -30.0
-const MAX_X := 30.0
-const MIN_Z := -30.0
-const MAX_Z := 30.0
+const MIN_X := -12.0
+const MAX_X := 12.0
+const MIN_Z := -24.0
+const MAX_Z := 24.0
 const PATH_HALF := Vector2(1, 1)
 const TOWER_HALF := Vector2(0.5, 0.5)
 const PATH_CONNECT_DISTANCE := 2.0
 const TOWER_PATH_PADDING := 0.5
+const GRID_LINE_THICKNESS := 0.04
+const GRID_LINE_HEIGHT := 0.02
+const GRID_COLOR := Color(0.2, 0.85, 1.0, 0.25)
 
 var EnemyScene = preload("res://assets/models/enemy.tscn")
 var TowerScene = preload("res://assets/models/tower.tscn")
@@ -29,23 +32,27 @@ var placement_mode := ""
 @onready var exit_button = $CanvasLayer/StartMenu/VBoxContainer/ExitButton
 @onready var settings_menu = $CanvasLayer/SettingsMenu
 @onready var settings_back = $CanvasLayer/SettingsMenu/VBoxContainer/BackButton
-@onready var edit_button = $CanvasLayer/EditButton
-@onready var run_button = $CanvasLayer/RunButton
-@onready var stop_button = $CanvasLayer/StopButton
-@onready var path_button = $CanvasLayer/PathButton
-@onready var turret_button = $CanvasLayer/TurretButton
-@onready var menu_button = $CanvasLayer/MenuButton
+@onready var edit_button = $CanvasLayer/ActionBar/EditButton
+@onready var run_button = $CanvasLayer/ActionBar/RunButton
+@onready var stop_button = $CanvasLayer/ActionBar/StopButton
+@onready var path_button = $CanvasLayer/ActionBar/PathButton
+@onready var turret_button = $CanvasLayer/ActionBar/TurretButton
+@onready var menu_button = $CanvasLayer/ActionBar/MenuButton
+@onready var top_hud = $CanvasLayer/TopHUD
+@onready var action_bar = $CanvasLayer/ActionBar
+@onready var shop_panel = $CanvasLayer/ShopPanel
 @onready var selection_panel = $CanvasLayer/SelectionPanel
-@onready var sell_button = $CanvasLayer/SelectionPanel/VBoxContainer/SellButton
-@onready var upgrade_button = $CanvasLayer/SelectionPanel/VBoxContainer/UpgradeButton
-@onready var move_button = $CanvasLayer/SelectionPanel/VBoxContainer/MoveButton
-@onready var delete_button = $CanvasLayer/SelectionPanel/VBoxContainer/DeleteButton
+@onready var sell_button = $CanvasLayer/SelectionPanel/SelectionMargin/VBoxContainer/SellButton
+@onready var upgrade_button = $CanvasLayer/SelectionPanel/SelectionMargin/VBoxContainer/UpgradeButton
+@onready var move_button = $CanvasLayer/SelectionPanel/SelectionMargin/VBoxContainer/MoveButton
+@onready var delete_button = $CanvasLayer/SelectionPanel/SelectionMargin/VBoxContainer/DeleteButton
 @onready var camera = $Camera3D
 var preview_path
 var preview_tower
 var selected_node: Node3D
 var original_material: Material
 var moving_node: Node3D
+var placement_grid: Node3D
 
 func in_bounds(pos: Vector3) -> bool:
 	return pos.x >= MIN_X and pos.x <= MAX_X and pos.z >= MIN_Z and pos.z <= MAX_Z
@@ -69,12 +76,9 @@ func _ready() -> void:
 	move_button.pressed.connect(_on_move_pressed)
 	delete_button.pressed.connect(_on_delete_pressed)
 	menu_button.pressed.connect(_on_menu_pressed)
-	edit_button.visible = false
-	run_button.visible = false
-	stop_button.visible = false
-	path_button.visible = false
-	turret_button.visible = false
-	menu_button.visible = false
+	top_hud.visible = false
+	action_bar.visible = false
+	shop_panel.visible = false
 	selection_panel.visible = false
 	settings_menu.hide()
 	set_process(true)
@@ -82,10 +86,10 @@ func _ready() -> void:
 
 func setup_world() -> void:
 	var core = CoreScene.instantiate()
-	core.position = Vector3(0, 0, 0)
+	core.position = Vector3(0, 0, -20)
 	add_child(core)
 
-	path_positions = [Vector3(-20, 0, 0), core.position]
+	path_positions = [Vector3(0, 0, 20), core.position]
 
 	var start_path = PathScene.instantiate()
 	start_path.position = path_positions[0]
@@ -93,9 +97,12 @@ func setup_world() -> void:
 	add_child(start_path)
 
 	var tower = TowerScene.instantiate()
-	tower.position = Vector3(-10, 0, 2)
+	tower.position = Vector3(2, 0, 10)
 	add_child(tower)
 	tower.add_to_group("towers")
+
+	_create_placement_grid()
+	placement_grid.visible = false
 
 	preview_path = PathScene.instantiate()
 	var mesh = preview_path.get_node("Mesh") as MeshInstance3D
@@ -124,6 +131,9 @@ func start_game() -> void:
 	game_loaded = true
 	start_menu.hide()
 	settings_menu.hide()
+	top_hud.show()
+	action_bar.show()
+	shop_panel.show()
 	edit_button.show()
 	run_button.show()
 	stop_button.hide()
@@ -160,9 +170,13 @@ func toggle_edit() -> void:
 		placement_mode = ""
 		preview_path.hide()
 		preview_tower.hide()
+		if placement_grid:
+			placement_grid.hide()
 		path_button.text = "Place Path"
 		turret_button.text = "Place Turret"
 		clear_selection()
+	elif placement_grid:
+		placement_grid.show()
 	path_button.disabled = not editing_mode
 	turret_button.disabled = not editing_mode
 	var enemies = get_tree().get_nodes_in_group("enemies")
@@ -180,14 +194,26 @@ func start_waves() -> void:
 	edit_button.hide()
 	preview_path.hide()
 	preview_tower.hide()
+	if placement_grid:
+		placement_grid.hide()
 	path_button.hide()
 	turret_button.hide()
+	shop_panel.hide()
 	spawn_time = spawn_interval
 
 func stop_waves() -> void:
 	if not waves_running:
 		return
 	spawn_time = spawn_interval
+	run_button.show()
+	stop_button.hide()
+	edit_button.show()
+	path_button.show()
+	turret_button.show()
+	shop_panel.show()
+	if placement_grid:
+		placement_grid.hide()
+	waves_running = false
 	var enemies = get_tree().get_nodes_in_group("enemies")
 	for e in enemies:
 		e.queue_free()
@@ -430,6 +456,40 @@ func set_mode_turret() -> void:
 		if editing_mode:
 			preview_tower.show()
 		clear_selection()
+
+func _create_placement_grid() -> void:
+	placement_grid = Node3D.new()
+	placement_grid.name = "PlacementGrid"
+	add_child(placement_grid)
+
+	var x_span: float = MAX_X - MIN_X
+	var z_span: float = MAX_Z - MIN_Z
+
+	for x in range(int(MIN_X), int(MAX_X) + 1):
+		var line_z := _make_grid_line(z_span + 1.0, true)
+		line_z.position = Vector3(float(x), GRID_LINE_HEIGHT, 0)
+		placement_grid.add_child(line_z)
+
+	for z in range(int(MIN_Z), int(MAX_Z) + 1):
+		var line_x := _make_grid_line(x_span + 1.0, false)
+		line_x.position = Vector3(0, GRID_LINE_HEIGHT, float(z))
+		placement_grid.add_child(line_x)
+
+func _make_grid_line(length: float, along_z: bool) -> MeshInstance3D:
+	var line := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	if along_z:
+		mesh.size = Vector3(GRID_LINE_THICKNESS, GRID_LINE_THICKNESS, length)
+	else:
+		mesh.size = Vector3(length, GRID_LINE_THICKNESS, GRID_LINE_THICKNESS)
+	line.mesh = mesh
+	var material := StandardMaterial3D.new()
+	material.albedo_color = GRID_COLOR
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.flags_transparent = true
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	line.set_surface_override_material(0, material)
+	return line
 
 func _on_menu_pressed() -> void:
 	get_tree().reload_current_scene()
